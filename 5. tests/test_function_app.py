@@ -11,22 +11,28 @@ with open("tests/test_data.json") as f:
 with open("tests/schema.json") as f:
     schema = json.load(f)
 
-def test_validate_user_data():
+def test_validate_user_data(snapshot):
     """
-    Test per validare i dati dell'utente contro uno schema JSON utilizzando jsonschema.
+    Test per validare i dati dell'utente contro uno schema JSON
+    e verificare che i dati restituiti siano invariati tramite snapshot.
     """
+    # Valida il JSON contro lo schema
     try:
         validate(instance=sample_data, schema=schema)
     except ValidationError as e:
         pytest.fail(f"Validation error: {e.message}")
 
-    # Chiama la funzione validate_user_data per ulteriore verifica specifica
+    # Chiama la funzione validate_user_data e verifica il risultato
     result = validate_user_data(sample_data)
     assert result == True, "La funzione validate_user_data ha fallito con dati validi"
 
-def test_invalid_user_data():
+    # Confronta lo snapshot con i dati di esempio
+    snapshot.assert_match(sample_data, "sample_data_snapshot")
+
+def test_invalid_user_data(snapshot):
     """
-    Test per controllare che la funzione validate_user_data fallisca con dati non validi.
+    Test per controllare che la funzione validate_user_data fallisca con dati non validi
+    e validazione snapshot.
     """
     invalid_data = sample_data.copy()
     invalid_data["age"] = "invalid_age"  # Aggiungi un valore non valido
@@ -34,6 +40,9 @@ def test_invalid_user_data():
     with pytest.raises(ValidationError):
         validate(instance=invalid_data, schema=schema)
 
-    # Chiama la funzione validate_user_data per verificare che ritorni False
+    # Verifica che la funzione ritorni False per dati non validi
     result = validate_user_data(invalid_data)
     assert result == False, "La funzione validate_user_data ha passato dati non validi"
+
+    # Confronta lo snapshot con i dati non validi
+    snapshot.assert_match(invalid_data, "invalid_data_snapshot")
