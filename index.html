@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Numeri</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    input, button { margin: 10px 0; padding: 10px; width: 100%; }
+    pre { background: #f4f4f4; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>API Numeri</h1>
+  <form id="form">
+    <label for="numeri">Inserisci i numeri (separati da virgola):</label>
+    <input type="text" id="numeri" placeholder="Es: 1, 2, 3, 4">
+    <button type="submit">Invia</button>
+  </form>
+  <h2>Risultato</h2>
+  <pre id="result">Nessun risultato ancora.</pre>
+  
+  <script>
+    document.getElementById("form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const numeriInput = document.getElementById("numeri").value.split(',').map(n => parseFloat(n.trim()));
+      
+      const response = await fetch("https://nice-sky-0af1af710.4.azurestaticapps.net", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeri: numeriInput })
+      });
+      
+      const result = await response.json();
+      document.getElementById("result").textContent = JSON.stringify(result, null, 2);
+    });
+  </script>
+</body>
+</html>
