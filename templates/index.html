@@ -11,7 +11,7 @@
             const risultatoDiv = document.getElementById("risultato");
 
             try {
-                const response = await fetch("/processa", {
+                const response = await fetch("/api/processa", { // Modificato il percorso
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ numeri })
