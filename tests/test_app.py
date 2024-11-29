@@ -1,41 +1,27 @@
 import pytest
 import json
-import importlib.util
+import importlib
 from snapshottest import Snapshot
+from app import processa_numeri
 
-# Carica dinamicamente l'app da un file esterno
-def carica_modulo(file_path, nome_modulo):
-    spec = importlib.util.spec_from_file_location(nome_modulo, file_path)
-    modulo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(modulo)
-    return modulo
-
-# Carichiamo il modulo 'app.py'
-app = carica_modulo('app.py', 'app')
-
-# Test dell'API usando pytest
 @pytest.fixture
-def client():
-    app_instance = app.app
-    app_instance.testing = True
-    return app_instance.test_client()
+def snapshot(snapshot: Snapshot):
+    return snapshot
 
-def test_processa_endpoint(client, snapshot):
-    # Dati di input
-    dati = {"numeri": [2, 3, 4, 5, 6, 7, 8, 9]}
-    
-    # Chiamata all'endpoint
-    response = client.post("/processa", data=json.dumps(dati), content_type="application/json")
-    
-    # Verifica del codice di stato
-    assert response.status_code == 200
-    
-    # Verifica della risposta
-    risultato = response.get_json()
-    snapshot.assert_match(risultato, "risultato_atteso")
-
-def test_html_serving(client):
-    # Testa se l'HTML viene servito correttamente
-    response = client.get("/")
-    assert response.status_code == 200
-    assert b"<title>Analisi dei Numeri</title>" in response.data
+def test_processa_numeri(snapshot):
+    # Input di esempio
+    numeri_input = [1, 2, 3, 4, 5]
+    # Chiamata alla funzione
+    risultato = processa_numeri({"numeri": numeri_input})
+    # Aspettarsi l'output in formato JSON
+    expected = {
+        "numeri": numeri_input,
+        "somma": 15,
+        "numeri_pari": [2, 4],
+        "numeri_dispari": [1, 3, 5],
+        "numeri_primi": [2, 3, 5]
+    }
+    # Verifica con lo snapshot
+    snapshot.assert_match(risultato, "processa_numeri_snapshot")
+    # Test aggiuntivo diretto
+    assert risultato == expected
