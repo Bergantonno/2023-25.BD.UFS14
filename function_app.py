@@ -1,52 +1,56 @@
-import json
-import azure.functions as func
+from flask import Flask, request, jsonify
 from jsonschema import validate, ValidationError
 
-# Definisci lo schema per la validazione JSON
-user_schema = {
+app = Flask(__name__)
+
+# Schema JSON per validare l'input
+schema_input = {
     "type": "object",
     "properties": {
-        "name": {"type": "string"},
-        "age": {"type": "integer", "minimum": 0},
+        "numeri": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 1
+        }
     },
-    "required": ["name", "age"]
+    "required": ["numeri"]
 }
 
-def validate_user_data(data):
-    """
-    Funzione per validare i dati JSON di un utente.
-    Restituisce True se i dati sono validi, altrimenti False.
-    """
-    try:
-        validate(instance=data, schema=user_schema)
-        return True
-    except ValidationError:
+def is_primo(numero):
+    if numero < 2:
         return False
+    for i in range(2, int(numero**0.5) + 1):
+        if numero % i == 0:
+            return False
+    return True
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
-    """
-    Funzione Azure che riceve una richiesta HTTP contenente dati JSON,
-    li valida e restituisce una risposta.
-    """
+@app.route('/processa', methods=['POST'])
+def processa_numeri():
     try:
-        # Ottieni i dati JSON dalla richiesta
-        req_body = req.get_json()
-    except ValueError:
-        return func.HttpResponse(
-            "Richiesta non valida: il corpo della richiesta deve essere JSON.",
-            status_code=400
-        )
+        # Recupera e valida i dati ricevuti
+        dati = request.get_json()
+        validate(instance=dati, schema=schema_input)
+        
+        numeri = dati["numeri"]
+        totale = sum(numeri)
+        media = totale / len(numeri)
+        pari = len([n for n in numeri if n % 2 == 0])
+        dispari = len(numeri) - pari
+        numeri_primi = [n for n in numeri if is_primo(n)]
+        
+        # Restituisce il risultato
+        return jsonify({
+            "totale": totale,
+            "media": media,
+            "numeri_pari": pari,
+            "numeri_dispari": dispari,
+            "numeri_primi": numeri_primi
+        })
+    
+    except ValidationError as e:
+        return jsonify({"errore": f"Input non valido: {e.message}"}), 400
+    except Exception as e:
+        return jsonify({"errore": f"Si è verificato un errore: {str(e)}"}), 500
 
-    # Valida i dati usando lo schema
-    if validate_user_data(req_body):
-        return func.HttpResponse(
-            json.dumps({"message": "Dati validi"}), 
-            mimetype="application/json",
-            status_code=200
-        )
-    else:
-        return func.HttpResponse(
-            json.dumps({"message": "Dati non validi"}),
-            mimetype="application/json",
-            status_code=400
-        )
+if __name__ == '__main__':
+    app.run(debug=True)
