@@ -1,5 +1,7 @@
 azure-functions
 flask
+flask-cors
 pytest
 jsonschema
 snapshottest
+app
