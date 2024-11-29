@@ -39,7 +39,7 @@ def test_api_valid_input(client, snapshot):
     assert response.status_code == 200
 
     # Snapshot del risultato
-    snapshot.assert_match(response.get_json(), snapshot_name="api_valid_input")
+    snapshot.assert_match(str(response.get_json()), snapshot_name="api_valid_input")
 
 # Test: Chiamata API con input non valido
 def test_api_invalid_input(client):
