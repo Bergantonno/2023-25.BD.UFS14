@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
 from jsonschema import validate, ValidationError
+from flask_cors import CORS
 
+# App Flask
 app = Flask(__name__)
+CORS(app)  # Abilita CORS per tutte le origini
 
 # Schema JSON per validare l'input
 schema_input = {
