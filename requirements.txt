@@ -1,5 +1,4 @@
-Flask
+flask
 pytest
-pytest-snapshot
 jsonschema
-azure-functions
+snapshottest
