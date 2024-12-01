@@ -1,7 +1,6 @@
+logging
 azure-functions
-flask
-flask-cors
-pytest
+json
 jsonschema
+pytest
 snapshottest
-app
