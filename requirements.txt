@@ -1,5 +1,7 @@
 logging
 azure-functions
+function_app
+function
 jsonschema
 pytest
 snapshottest
